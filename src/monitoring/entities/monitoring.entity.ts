@@ -8,21 +8,20 @@ import {
 import { IsString, IsNotEmpty, IsEmail, MinLength, IsNumber } from 'class-validator';
 
 @Entity()
-export class Group {
+export class Monitoring {
     @PrimaryGeneratedColumn()
     @IsNumber()
     @IsNotEmpty()
     id: number;
 
-    @Column({unique: true})
+    @Column()
     @IsString()
     @IsNotEmpty()
-    @MinLength(5)
-    name: string;
+    backtrace: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+    @CreateDateColumn()
+    createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+    @UpdateDateColumn()
+    updatedAt: Date;
 }

@@ -30,6 +30,10 @@ export class User {
   @IsNotEmpty()
   @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres.' })
   password: string;
+  
+  @IsNumber()
+  @IsNotEmpty()
+  statusId: number;
 
   @CreateDateColumn()
   createdAt: Date;

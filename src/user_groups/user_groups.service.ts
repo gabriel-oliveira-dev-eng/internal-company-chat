@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserGroupDto } from './dto/create-user_group.dto';
 import { UpdateUserGroupDto } from './dto/update-user_group.dto';
+import { UserGroup } from './entities/user_group.entity';
 
 @Injectable()
 export class UserGroupsService {
-  create(createUserGroupDto: CreateUserGroupDto) {
-    return 'This action adds a new userGroup';
+  constructor(
+    @InjectRepository(UserGroup)
+    private usersGroupRepository: Repository<UserGroup>,
+  ) {}
+
+  async create(createUserGroupDto: CreateUserGroupDto): Promise<UserGroup> {
+    const newUserGroup = this.usersGroupRepository.create(createUserGroupDto);
+    return this.usersGroupRepository.save(newUserGroup);
   }
 
-  findAll() {
-    return `This action returns all userGroups`;
+  async findAll(): Promise<UserGroup[]> {
+    return this.usersGroupRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userGroup`;
+  async findOne(id: number): Promise<UserGroup> {
+    const user = await this.usersGroupRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+    }
+    return user;
   }
 
-  update(id: number, updateUserGroupDto: UpdateUserGroupDto) {
-    return `This action updates a #${id} userGroup`;
+  async update(id: number, updateUserGroupDto: UpdateUserGroupDto): Promise<UserGroup> {
+    const user = await this.findOne(id);
+    this.usersGroupRepository.merge(user, updateUserGroupDto);
+    return this.usersGroupRepository.save(user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userGroup`;
+  async remove(id: number): Promise<void> {
+    const result = await this.usersGroupRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+    }
   }
 }

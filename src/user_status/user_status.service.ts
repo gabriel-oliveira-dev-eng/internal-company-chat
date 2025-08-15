@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserStatusDto } from './dto/create-user_status.dto';
 import { UpdateUserStatusDto } from './dto/update-user_status.dto';
+import { UserStatus } from './entities/user_status.entity';
 
 @Injectable()
 export class UserStatusService {
-  create(createUserStatusDto: CreateUserStatusDto) {
-    return 'This action adds a new userStatus';
+  constructor(
+    @InjectRepository(UserStatus)
+    private userStatusRepository: Repository<UserStatus>,
+  ) {}
+
+  async create(createUserStatusDto: CreateUserStatusDto): Promise<UserStatus> {
+    const newUserStatus = this.userStatusRepository.create(createUserStatusDto);
+    return this.userStatusRepository.save(newUserStatus);
   }
 
-  findAll() {
-    return `This action returns all userStatus`;
+  async findAll(): Promise<UserStatus[]> {
+    return this.userStatusRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} userStatus`;
+  async findOne(id: number): Promise<UserStatus> {
+    const userStatus = await this.userStatusRepository.findOne({ where: { id } });
+    if (!userStatus) {
+      throw new NotFoundException(`Status com ID ${id} não encontrado.`);
+    }
+    return userStatus;
   }
 
-  update(id: number, updateUserStatusDto: UpdateUserStatusDto) {
-    return `This action updates a #${id} userStatus`;
+  async update(id: number, updateUserStatusDto: UpdateUserStatusDto): Promise<UserStatus> {
+    const userStatus = await this.findOne(id);
+    this.userStatusRepository.merge(userStatus, updateUserStatusDto);
+    return this.userStatusRepository.save(userStatus);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} userStatus`;
+  async remove(id: number): Promise<void> {
+    const result = await this.userStatusRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Status com ID ${id} não encontrado.`);
+    }
   }
 }
