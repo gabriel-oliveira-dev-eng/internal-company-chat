@@ -12,6 +12,5 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @Validate(PasswordStrengthValidator)
   password: string;
 }

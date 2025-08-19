@@ -11,9 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { MonitoringModule } from './monitoring/monitoring.module';
-import { AuthModule } from './auth/auth.module';
-import { UserAuthService } from './user-auth/user-auth.service';
-import { UserAuthModule } from './user-auth/user-auth.module';
+
 
 @Module({
   imports: [
@@ -40,11 +38,9 @@ import { UserAuthModule } from './user-auth/user-auth.module';
     UserStatusModule,
     GroupsModule,
     MonitoringModule,
-    AuthModule,
-    UserAuthModule
   ],
   controllers: [AppController],
-  providers: [AppService, UserAuthService],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer){
