@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IsString, IsNotEmpty, IsEmail, MinLength, IsNumber } from 'class-validator';
+import { Role } from 'src/auth/roles/role.enum';
 
 @Entity()
 export class User {
@@ -34,6 +35,13 @@ export class User {
   @IsNumber()
   @IsNotEmpty()
   statusId: number;
+
+  @Column({
+    type: 'simple-json', // Use simple-json for MariaDB to store an array
+    default: JSON.stringify([Role.User]), // Default value should be an array
+  })
+  roles: Role[];
+
 
   @CreateDateColumn()
   createdAt: Date;

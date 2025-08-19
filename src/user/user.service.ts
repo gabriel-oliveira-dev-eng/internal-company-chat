@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { Role } from '../auth/roles/role.enum';
 
 @Injectable()
 export class UserService {
@@ -36,10 +37,35 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    this.usersRepository.merge(user, updateUserDto);
-    return this.usersRepository.save(user);
+  async update(id: number, updateUserDto: UpdateUserDto, currentUser: any): Promise<User> {
+    // 1. Encontre o usuário que será atualizado
+    const userToUpdate = await this.findOne(id);
+    
+    // 2. Lógica de permissão
+    const isUserAdminOrAudit = currentUser.roles?.includes(Role.Admin) || currentUser.roles?.includes(Role.Audit);
+    const isUpdatingSelf = currentUser.userId === userToUpdate.id;
+
+    if (!isUserAdminOrAudit && !isUpdatingSelf) {
+      // Se não for admin/audit e não estiver atualizando o próprio perfil, negue o acesso
+      throw new ForbiddenException('Você não tem permissão para editar este usuário.');
+    }
+
+    // 3. Continue com a atualização se a permissão for concedida
+    if (updateUserDto.email !== undefined) userToUpdate.email = updateUserDto.email;
+    if (updateUserDto.password !== undefined) userToUpdate.password = updateUserDto.password;
+    
+    // Lógica para atualização de roles
+    if (updateUserDto.roles !== undefined) {
+      if (!isUserAdminOrAudit) {
+        // Impede que um usuário comum altere sua própria role
+        throw new ForbiddenException('Você não pode alterar sua própria role.');
+      } else {
+        // Se for admin ou audit, permita a alteração
+        userToUpdate.roles = updateUserDto.roles;
+      }
+    }
+
+    return this.usersRepository.save(userToUpdate);
   }
 
   async remove(id: number): Promise<void> {
