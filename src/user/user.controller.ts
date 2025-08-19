@@ -9,9 +9,15 @@ import { Role } from '../auth/roles/role.enum';
 
 
 @Controller('user')
-/*@UseGuards(AuthGuard('jwt'), RolesGuard)*/
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('me')
+  getMe(@Request() req) {
+    const username = req.user.username;
+    return this.userService.findOneByUsername(username);
+  }
 
   @Post()
   /*@Roles(Role.Admin)*/
