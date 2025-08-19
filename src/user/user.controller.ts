@@ -9,12 +9,12 @@ import { Role } from '../auth/roles/role.enum';
 
 
 @Controller('user')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+/*@UseGuards(AuthGuard('jwt'), RolesGuard)*/
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @Roles(Role.Admin)
+  /*@Roles(Role.Admin)*/
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }

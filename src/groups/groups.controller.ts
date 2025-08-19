@@ -19,7 +19,7 @@ export class GroupsController {
   }
 
   @Get()
-  @Roles(Role.Admin)
+  @Roles(Role.User, Role.Admin)
   findAll() {
     return this.groupsService.findAll();
   }
