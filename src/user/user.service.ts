@@ -13,13 +13,9 @@ export class UserService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async login(username: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { username } });
-    if (!user) {
-      throw new NotFoundException(`Usuário com username ${username} não encontrado.`);
-    }
-    return user;
-  }
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const salt = await bcrypt.genSalt();
