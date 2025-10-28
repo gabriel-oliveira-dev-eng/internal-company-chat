@@ -13,9 +13,13 @@ import { join } from 'path';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
+    MongooseModule.forRoot(
+      'mongodb+srv://com4system:SZVmVqJZR2iDtNjr@internal-chat-company.mg5ae4v.mongodb.net/internal-chat-db?retryWrites=true&w=majority',
+    ),
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,

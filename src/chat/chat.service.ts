@@ -1,4 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { ChatMessage } from "./chat.schema";
+import { timestamp } from "rxjs";
 
 export interface Message {
     to: string;
@@ -9,32 +13,25 @@ export interface Message {
 
 @Injectable()
 export class ChatService {
-    private messages: Message[] = [];
+    constructor(
+        @InjectModel(ChatMessage.name)
+        private readonly messageModel: Model<ChatMessage>
+    ){}
 
-    addMessage(to: string, from:string, text: string): Message {
-        const message: Message = {
-            to,
-            from,
-            text,
-            timestamp: new Date(),
-        };
-        this.messages.push(message);
-        return message;
+    async addMessage(from: string, to: string, text: string): Promise<ChatMessage>{
+        const newMessage = new this.messageModel({from, to, text});
+        return newMessage.save()
     }
 
-    getMessagesBetween(userA: string, userB: string): Message[]{
-        return this.messages.filter(
-            (msg) =>
-            (msg.from === userA && msg.to === userB) ||
-            (msg.from === userB && msg.to === userA)
-        );
-    }
-
-    getAllMessages(): Message[] {
-        return this.messages;
-    }
-
-    clearMessages(){
-        this.messages = [];
+    async getMessagesBetween(user: string, targetUser:string): Promise<ChatMessage[]>{
+        return this.messageModel
+        .find({
+            $or: [
+                {from: user, to: targetUser},
+                {from: targetUser, to: user},
+            ]
+        })
+        .sort({timestamp: 1})
+        .exec();
     }
 }
