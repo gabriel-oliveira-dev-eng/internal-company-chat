@@ -1,7 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 export interface Message {
-    user: string;
+    to: string;
+    from: string;
     text: string;
     timestamp: Date;
 }
@@ -10,14 +11,23 @@ export interface Message {
 export class ChatService {
     private messages: Message[] = [];
 
-    addMessage(user: string, text: string): Message {
+    addMessage(to: string, from:string, text: string): Message {
         const message: Message = {
-            user,
+            to,
+            from,
             text,
             timestamp: new Date(),
         };
         this.messages.push(message);
         return message;
+    }
+
+    getMessagesBetween(userA: string, userB: string): Message[]{
+        return this.messages.filter(
+            (msg) =>
+            (msg.from === userA && msg.to === userB) ||
+            (msg.from === userB && msg.to === userA)
+        );
     }
 
     getAllMessages(): Message[] {
