@@ -20,7 +20,6 @@ export class UserController {
   }
 
   @Post()
-  /*@Roles(Role.Admin)*/
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }

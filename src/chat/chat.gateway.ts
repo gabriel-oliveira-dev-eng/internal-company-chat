@@ -26,6 +26,7 @@ export class ChatGateway {
     const user = client.handshake.query.user as string;
     if (user) {
       this.clients.set(user, client);
+      this.broadcastOnlineUsers();
     }
   }
 
@@ -33,8 +34,20 @@ export class ChatGateway {
     for (const [user, sock] of this.clients.entries()) {
       if (sock.id === client.id) {
         this.clients.delete(user);
+        this.broadcastOnlineUsers();
       }
     }
+  }
+
+  private broadcastOnlineUsers(){
+    const onlineUsers = Array.from(this.clients.keys());
+    this.server.emit("onlineUsers", onlineUsers);
+  }
+
+  @SubscribeMessage("getOnlineUsers")
+  handleGetOnlineUsers(@ConnectedSocket() client: Socket){
+    const onlineUsers = Array.from(this.clients.keys());
+    client.emit("onlineUsers", onlineUsers);
   }
 
   @SubscribeMessage('message')

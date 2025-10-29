@@ -22,6 +22,12 @@ export class User {
   username: string;
 
   @Column({ unique: true })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(4)
+  full_name: string;
+
+  @Column({ unique: true })
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -31,7 +37,8 @@ export class User {
   @IsNotEmpty()
   @MinLength(8, { message: 'A senha deve ter no mínimo 8 caracteres.' })
   password: string;
-  
+
+  @Column()
   @IsNumber()
   @IsNotEmpty()
   statusId: number;

@@ -11,7 +11,6 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
-    // 💡 A busca pelo usuário deve usar o e-mail completo
     const user = await this.userService.findOneByEmail(email); // Alterar "login" para "findOneByEmail"
     if (user && (await bcrypt.compare(pass, user.password))) {
       const { password, ...result } = user;
@@ -21,9 +20,10 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.id, roles: user.roles };
+    const payload = { username: user.username,sub: user.id, roles: user.roles, full_name: user.full_name };
     return {
-      access_token: this.jwtService.sign(payload),
+     access_token: this.jwtService.sign(payload),
+     payload
     };
   }
 }

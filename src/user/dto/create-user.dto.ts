@@ -8,6 +8,10 @@ export class CreateUserDto {
   @IsNotEmpty()
   username: string;
 
+  @IsString()
+  @IsNotEmpty()
+  full_name: string;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -16,8 +20,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsArray() // Garante que o valor é um array
-  @IsEnum(Role, { each: true }) // Garante que cada item no array é um valor válido da enum
+  @IsArray()
+  @IsEnum(Role, { each: true })
   @IsNotEmpty()
   roles: Role[];
 }
