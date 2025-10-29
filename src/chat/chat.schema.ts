@@ -14,6 +14,9 @@ export class ChatMessage extends Document {
 
     @Prop({default: Date.now})
     timestamp: Date;
+
+    @Prop({ default: false })
+    delivered: boolean;
 }
 
 export const ChatMessageSchema = SchemaFactory.createForClass(ChatMessage);

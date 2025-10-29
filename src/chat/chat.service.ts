@@ -1,37 +1,61 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ChatMessage } from "./chat.schema";
-import { timestamp } from "rxjs";
 
 export interface Message {
     to: string;
     from: string;
     text: string;
     timestamp: Date;
+    delivered: boolean;
 }
 
 @Injectable()
 export class ChatService {
     constructor(
         @InjectModel(ChatMessage.name)
-        private readonly messageModel: Model<ChatMessage>
-    ){}
+        private readonly messageModel: Model<ChatMessage>,
+    ) {}
 
-    async addMessage(from: string, to: string, text: string): Promise<ChatMessage>{
-        const newMessage = new this.messageModel({from, to, text});
-        return newMessage.save()
+    // Adiciona mensagem
+    async addMessage(from: string, to: string, text: string): Promise<ChatMessage> {
+        const newMessage = new this.messageModel({
+            from,
+            to,
+            text,
+            delivered: false, // por padrão não entregue
+            timestamp: new Date(),
+        });
+        return newMessage.save();
     }
 
-    async getMessagesBetween(user: string, targetUser:string): Promise<ChatMessage[]>{
+    // Recupera todas as mensagens entre dois usuários
+    async getMessagesBetween(user: string, targetUser: string): Promise<ChatMessage[]> {
         return this.messageModel
-        .find({
-            $or: [
-                {from: user, to: targetUser},
-                {from: targetUser, to: user},
-            ]
-        })
-        .sort({timestamp: 1})
-        .exec();
+            .find({
+                $or: [
+                    { from: user, to: targetUser },
+                    { from: targetUser, to: user },
+                ],
+            })
+            .sort({ timestamp: 1 })
+            .exec();
+    }
+
+    // Recupera mensagens pendentes (não entregues) para um usuário
+    async getPendingMessages(user: string): Promise<ChatMessage[]> {
+        return this.messageModel
+            .find({ to: user, delivered: false })
+            .sort({ timestamp: 1 })
+            .exec();
+    }
+
+    // Marca uma mensagem como entregue
+    async markMessageAsDelivered(messageId: string): Promise<void> {
+        await this.messageModel.updateOne(
+            { _id: messageId },
+            { $set: { delivered: true } },
+        );
     }
 }
